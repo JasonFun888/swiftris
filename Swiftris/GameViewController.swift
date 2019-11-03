@@ -73,12 +73,12 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
     }
     
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailByGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let swipeRec = gestureRecognizer as? UISwipeGestureRecognizer {
-            if let panRec = otherGestureRecognizer as? UIPanGestureRecognizer {
+        if gestureRecognizer is UISwipeGestureRecognizer {
+            if otherGestureRecognizer is UIPanGestureRecognizer {
                 return true
             }
-        } else if let panRec = gestureRecognizer as? UIPanGestureRecognizer {
-            if let tapRec = otherGestureRecognizer as? UITapGestureRecognizer {
+        } else if gestureRecognizer is UIPanGestureRecognizer {
+            if otherGestureRecognizer is UITapGestureRecognizer {
                 return true
             }
         }
@@ -91,12 +91,13 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
     
     func nextShape() {
         let newShapes = swiftris.newShape()
-        if let fallingShape = newShapes.fallingShape {
-            self.scene.addPreviewShapeToScene(newShapes.nextShape!) {}
-            self.scene.movePreviewShape(fallingShape) {
-                self.view.userInteractionEnabled = true
-                self.scene.startTicking()
-            }
+        guard let fallingShape = newShapes.fallingShape else {
+            return
+        }
+        self.scene.addPreviewShapeToScene(newShapes.nextShape!) {}
+        self.scene.movePreviewShape(fallingShape) {
+            self.view.userInteractionEnabled = true
+            self.scene.startTicking()
         }
     }
     
@@ -118,8 +119,8 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
     func gameDidEnd(swiftris: Swiftris) {
         view.userInteractionEnabled = false
         scene.stopTicking()
-        scene.playSound("gameover.mp3")
-        scene.animateCollapsingLines(swiftris.removeAllBlocks(), fallenBlocks: Array<Array<Block>>()) {
+        scene.playSound("Sounds/gameover.mp3")
+        scene.animateCollapsingLines(swiftris.removeAllBlocks(), fallenBlocks: swiftris.removeAllBlocks()) {
             swiftris.beginGame()
         }
     }
@@ -131,7 +132,7 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
         } else if scene.tickLengthMillis > 50 {
             scene.tickLengthMillis -= 50
         }
-        scene.playSound("levelup.mp3")
+        scene.playSound("Sounds/levelup.mp3")
     }
     
     func gameShapeDidDrop(swiftris: Swiftris) {
@@ -139,7 +140,7 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
         scene.redrawShape(swiftris.fallingShape!) {
             swiftris.letShapeFall()
         }
-        scene.playSound("drop.mp3")
+        scene.playSound("Sounds/drop.mp3")
     }
     
     func gameShapeDidLand(swiftris: Swiftris) {
@@ -151,7 +152,7 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
             scene.animateCollapsingLines(removedLines.linesRemoved, fallenBlocks:removedLines.fallenBlocks) {
                 self.gameShapeDidLand(swiftris)
             }
-            scene.playSound("bomb.mp3")
+            scene.playSound("Sounds/bomb.mp3")
         } else {
             nextShape()
         }
